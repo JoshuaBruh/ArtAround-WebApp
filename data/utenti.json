@@ -1,0 +1,36 @@
+[
+  {
+    "id_utente": "autore1",
+    "username": "autore1",
+    "password": "12345678",
+    "ruolo": "autore",
+    "nome": "",
+    "guadagno_totale": 0.00,
+    "credito": 0.00
+  },
+  {
+    "id_utente": "autore2",
+    "username": "autore2",
+    "password": "12345678",
+    "ruolo": "autore",
+    "nome": "",
+    "guadagno_totale": 11.00,
+    "credito": 0.00
+  },
+  {
+    "id_utente": "visitatore1",
+    "username": "visitatore1",
+    "password": "12345678",
+    "ruolo": "visitatore",
+    "nome": "",
+    "credito": 115.50
+  },
+  {
+    "id_utente": "visitatore2",
+    "username": "visitatore2",
+    "password": "12345678",
+    "ruolo": "visitatore",
+    "nome": "",
+    "credito": 10.00
+  }
+]

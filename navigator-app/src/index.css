@@ -1,0 +1,185 @@
+/* ==========================================================================
+   1. VARIABILI CSS (Valori di fallback)
+   ========================================================================== */
+:root {
+  --museo-primario: #1b375dda;
+  /* Blu Impero */
+  --museo-secondario: #8b00009b;
+  /* Rosso */
+  --museo-terziario: #c59f59;
+  /* Oro */
+  --museo-sfondo: #878a8b;
+  /* Sfondo neutrale */
+}
+
+/* ==========================================================================
+   2. STRUTTURA GLOBALE E SFONDO UNICO
+   ========================================================================== */
+html,
+body,
+#root {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+body,
+
+.app-container {
+  background-color: color-mix(in srgb, var(--museo-sfondo) 20%, #f4f5f7);
+  color: #212529;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+/* Utilities di testo */
+.text-museo-terziario {
+  color: var(--museo-terziario);
+}
+
+.text-museo-primario {
+  color: var(--museo-primario);
+}
+
+.bg-museo-terziario {
+  background-color: var(--museo-terziario);
+}
+
+
+/* ==========================================================================
+   3. BOTTONI PERSONALIZZATI (Desaturati & Eleganti)
+   ========================================================================== */
+
+/* Bottone Primario / Movimento */
+.btn-museo-movimento {
+  background-color: var(--museo-primario);
+  color: #ffffff;
+  border: 1px solid var(--museo-primario);
+  font-weight: 600;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-museo-movimento:hover,
+.btn-museo-movimento:focus {
+  background-color: color-mix(in srgb, var(--museo-primario) 80%, #000);
+  border-color: var(--museo-terziario);
+  color: var(--museo-terziario);
+}
+
+/* Bottone Informativo: Usa il secondario sfumato con testo scuro/oro */
+.btn-museo-info {
+  background-color: color-mix(in srgb, var(--museo-secondario) 15%, #ffffff);
+  color: color-mix(in srgb, var(--museo-secondario) 80%, #000);
+  border: 1px solid color-mix(in srgb, var(--museo-secondario) 50%, transparent);
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-museo-info:hover,
+.btn-museo-info:focus {
+  background-color: var(--museo-secondario);
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   4. CARDS & HERO SECTION (Sfondi semi-trasparenti desaturati)
+   ========================================================================== */
+
+/* Container Hero: velatura del colore primario al 12% di opacità */
+.hero-museo {
+  background-color: color-mix(in srgb, var(--museo-primario) 12%, #ffffff);
+  backdrop-filter: blur(6px);
+  /* Effetto vetro se supportato */
+  border: 1px solid color-mix(in srgb, var(--museo-primario) 25%, transparent);
+  border-bottom: 3px solid var(--museo-terziario);
+  color: #212529;
+  padding: 2.5rem 1rem;
+}
+
+/* Card interne alla Hero: leggero tocco del colore secondario (8% opacità) */
+.hero-card {
+  background-color: color-mix(in srgb, var(--museo-secondario) 7%, #ffffff);
+  border: 1px solid color-mix(in srgb, var(--museo-terziario) 60%, transparent);
+  color: #212529;
+  border-radius: 12px;
+}
+
+.hero-card:hover {
+  transform: translateY(-3px);
+  background-color: color-mix(in srgb, var(--museo-secondario) 12%, #ffffff);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Disabilita lo spostamento solo se la card contiene selezioni o controlli */
+.hero-card:has(select):hover,
+.hero-card:focus-within {
+  transform: none;
+}
+
+.hero-card:focus-visible {
+  outline: 3px solid var(--museo-terziario);
+  outline-offset: 4px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Card delle Visite nella lista */
+.card-visita {
+  background-color: color-mix(in srgb, var(--museo-secondario) 6%, #ffffff);
+  border: 1px solid color-mix(in srgb, var(--museo-secondario) 20%, transparent);
+  border-left: 6px solid var(--museo-secondario);
+  border-radius: 8px;
+  color: #212529;
+}
+
+.card-opera-hero {
+  background-color: color-mix(in srgb, var(--museo-primario) 20%, #ffffff);
+  border: 1px solid color-mix(in srgb, var(--museo-terziario) 85%, transparent);
+  border-bottom: 3px solid var(--museo-terziario);
+  border-radius: 12px;
+}
+
+/* ==========================================================================
+   5. HEADER E FOOTER
+   ========================================================================== */
+.header-museo {
+  background-color: var(--museo-primario);
+  border-bottom: 2px solid var(--museo-terziario);
+}
+
+.footer-museo {
+  background-color: color-mix(in srgb, var(--museo-primario) 90%, #000);
+  border-top: 1px solid color-mix(in srgb, var(--museo-terziario) 40%, transparent);
+  color: color-mix(in srgb, #ffffff 70%, var(--museo-terziario));
+}
+
+/* ==========================================================================
+   INPUTS & SELECTIONS PERSONALIZZATI
+   ========================================================================== */
+.hero-card .form-control,
+.hero-card .form-select {
+  background-color: #ffffff;
+  border: 1px solid color-mix(in srgb, var(--museo-terziario) 50%, #ccc);
+  color: #212529;
+}
+
+.hero-card .form-control:focus,
+.hero-card .form-select:focus {
+  border-color: var(--museo-terziario);
+  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--museo-terziario) 25%, transparent);
+}
+
+/* Avviso lista vuota con colori museo */
+.alert-museo-empty {
+  background-color: color-mix(in srgb, var(--museo-secondario) 8%, #ffffff);
+  border: 1px solid color-mix(in srgb, var(--museo-terziario) 50%, transparent);
+  border-left: 5px solid var(--museo-terziario);
+  border-radius: 12px;
+  color: #212529;
+}

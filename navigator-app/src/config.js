@@ -1,0 +1,1 @@
+export const CONFIG = { id_museo: 'museo_napoleonico_roma' };

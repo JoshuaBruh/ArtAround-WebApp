@@ -1,0 +1,380 @@
+[
+  {
+    "id_museo": "museo_napoleonico_roma",
+    "nome": "Museo Napoleonico",
+    "immagine": "/media/musei/NapoleonicoRoma/MuseoNapoleonico.webp",
+    "citta": "Roma",
+    "costo": "2 €",
+    "info_generali": "Il Museo conserva la raccolta di opere e di cimeli napoleonici donati alla città di Roma dal conte Giuseppe Primoli, nipote dell’Imperatore, custoditi negli ambienti al pianterreno del suo palazzo: un racconto privato della storia dei Bonaparte che documenta gli intensi rapporti che legarono la famiglia imperiale a Roma.",
+    "indirizzi": {
+      "via": "Piazza di Ponte Umberto I 1",
+      "cap": "00186",
+      "provincia": "RM"
+    },
+    "orari": "al martedì alla domenica ore 10.00 - 18.00, 24 e 31 dicembre ore 10.00-14.00",
+    "struttura_sale": {
+      "sala_1": {
+        "nome": "Sala I - Il Primo Impero ",
+        "collocazione": "Lato Lungotevere Ovest",
+        "nota_per_orientarsi": "Entrando dall'ingresso principale, è la prima grande sala sulla sinistra.",
+        "descrizione": "Grande sala caratterizzata da pareti di colore blu intenso, il pavimento presenta un motivo geometrico a scacchiera in marmo bianco e grigio scuro. Al centro della stanza si trova un monumentale tripode in marmo con dettagli in bronzo. L'arredo include diverse sedie e divanetti in legno dorato con rivestimento in velluto rosso acceso"
+      },
+      "sala_2": {
+        "nome": "Sala II - Il Primo Impero (continuo) ",
+        "collocazione": "Lato Lungotevere Nord-Ovest",
+        "nota_per_orientarsi": "Stanza in diretta continuità con la Sala I, da cui è separata esclusivamente da una balaustra in marmo, e comunicante sul fondo con la Sala III.",
+        "descrizione": "Sala rettangolare con pareti dipinte di blu intenso, con un pavimento geometrico in marmo a scacchi bianchi grigio-scuri. Su una delle pareti spicca un caminetto in marmo chiaro finemente scolpito, sormontato da una grande specchiera integrata con cornice dorata."
+      },
+      "sala_3": {
+        "nome": "Sala III - Il Secondo Impero",
+        "collocazione": "Lato Nord",
+        "nota_per_orientarsi": "Si accede attraverso il portale situato sul fondo della Sala II, proseguendo lungo il lato settentrionale del palazzo.",
+        "descrizione": "Ambiente rettangolare di grande impatto, caratterizzato da pareti rivestite di un tessuto damascato rosso acceso. Il pavimento è composto da mattonelle con una fitta trama decorativa geometrica e floreale nei toni del marrone e dell'ocra, ed è attraversato per intero da una lunga passatoia rossa. L'arredamento comprende ampi divani e poltrone in tessuto rosso e un caminetto in marmo chiaro sormontato da una specchiera"
+      },
+      "sala_4": {
+        "nome": "Sala IV - Il Re di Roma",
+        "collocazione": "Lato Nord-Est",
+        "nota_per_orientarsi": "Si accede a questa stanza proseguendo direttamente dalla Sala III, seguendo il percorso delineato dalla passatoia rossa attraverso i varchi di collegamento.",
+        "descrizione": "Ambiente rettangolare con pareti interamente tinteggiate in una tonalità verde salvia chiaro. Il pavimento è interamente rivestito da mattonelle policrome con un fitto motivo geometrico e floreale, attraversato in un lembo da una passatoia rossa. L'arredamento è composto da ampi tavoli-bacheca espositivi in legno disposti lungo i lati della stanza, un tavolino centrale con piano circolare in marmo chiaro"
+      },
+      "sala_5": {
+        "nome": "Sala V - La Repubblica Romana",
+        "collocazione": "Lato Nord-Est",
+        "nota_per_orientarsi": "Piccolo vano di passaggio a pianta stretta, accessibile direttamente dopo aver superato la Sala IV.",
+        "descrizione": "Ambiente caratterizzato da pareti lineari intonacate in una tonalità bianca. Il pavimento è composto da mattonelle con motivi geometrici screziati nei toni del marrone, del beige e del grigio. L'arredo include due sedie con struttura in legno chiaro posizionate l'una di fronte all'altra, e un piccolo tavolo in legno accostato alla parete"
+      },
+      "sala_6": {
+        "nome": "Sala VI - Paolina Bonaparte",
+        "collocazione": "Lato Est",
+        "nota_per_orientarsi": "Si accede alla stanza oltrepassando il piccolo vano della Sala V, occupando l'angolo nord-orientale del percorso espositivo prima del passaggio alla Sala VII.",
+        "descrizione": "Sala che presenta un parquet a lunghi listoni in legno. Le pareti sono rifinite con un intonaco liscio in una sfumatura di verde chiarissimo e bianco. L'arredo comprende un lungo tavolo-bacheca una panca bassa e allungata priva di schienale e una console dorata intagliata con piano in marmo venato."
+      },
+      "sala_7": {
+        "nome": "Sala VII - Il Regno di Napoli",
+        "collocazione": "Lato Est",
+        "nota_per_orientarsi": "Proseguendo lungo il percorso dopo la Sala VI, si entra in questa ampia stanza situata sul lato orientale dell'edificio, che immette successivamente nella Sala VIII.",
+        "descrizione": "Sala che presenta un pavimento in parquet a lunghi listoni. Le pareti presentano un intonaco liscio di colore verde salvia estremamente tenue. Al centro della stanza risalta un tavolo circolare con un piano in marmo scuro. L'arredamento comprende due monumentali console dorate disposte lungo le pareti laterali."
+      },
+      "sala_8": {
+        "nome": "Sala VIII – Napoleone",
+        "collocazione": "Lato Sud-Est",
+        "nota_per_orientarsi": "Situata nell'estremità sud-orientale del palazzo, si accede a questa stanza direttamente dalla Sala VII.",
+        "descrizione": "Ambiente caratterizzato da un pavimento in parquet a lunghi listoni. Le pareti sono rivestite da grandi pannellature espositive lisce di colore grigio-azzurro chiaro, utilizzate anche per la stampa di testi didattici. Lungo il perimetro delle pareti è installata una struttura fissa continua a forma di leggio ad angolo, realizzata nella stessa colorazione grigio-azzurra dei pannelli"
+      },
+      "sala_9": {
+        "nome": "Sala IX - Zenaide e Carlotta",
+        "collocazione": "Lato Interno Ovest",
+        "nota_per_orientarsi": "Accessibile attraverso un varco dalla Sala II, questo ambiente si sviluppa parallelamente alle sale affacciate sul Lungotevere e conduce successivamente verso la Sala X.",
+        "descrizione": "Sala caratterizzata da pareti interamente rivestite da una tappezzeria di colore rosso acceso a bande verticali. Il pavimento è composto da mattonelle policrome con una fitta trama decorativa geometrica. L'arredo include un lungo divano modulare a più sedute e poltrone coordinate in legno dorato oltre a tavoli console con finiture dorate disposti lungo le pareti."
+      },
+      "sala_10": {
+        "nome": "Sala X - Luciano Bonaparte",
+        "collocazione": "Lato Interno",
+        "nota_per_orientarsi": "Si accede a questo ambiente proseguendo direttamente il percorso dalla Sala IX, all'interno della sezione dedicata alle sale interne del palazzo.",
+        "descrizione": "Ambiente caratterizzato da pareti interamente rivestite da una tappezzeria in un delicato color salmone. Il pavimento riprende lo stile dei vani precedenti, composto da mattonelle con un fitto motivo geometrico policromo. L'arredamento è composto da una console neoclassica con piano in marmo scuro sormontata da una grande specchiera, un tavolo d'appoggio con piano in marmo."
+      },
+      "sala_11": {
+        "nome": "Sala XI - Carlo Luciano e Zenaide Bonaparte",
+        "collocazione": "Lato Interno Meridionale",
+        "nota_per_orientarsi": "Si accede a questa sala proseguendo dalle sale interne dopo la Sala X; costituisce l'ambiente finale del percorso espositivo, collegandosi direttamente all'atrio d'ingresso principale.",
+        "descrizione": "Ambiente con pareti tinteggiate in una calda tonalità rosso mattone e un pavimento in parquet a lunghi listoni dalle sfumature rossastre, sormontato da un sontuoso lampadario dorato a bracci. L'arredamento include imponenti armadi-libreria in legno scuro, un tavolo consolle e un divano in stile impero con tappezzeria a righe verdi e dorate."
+      },
+      "sala_12": {
+        "nome": "Sala XII - Giuseppe Primoli e Matilde Bonaparte",
+        "collocazione": "Lato Interno",
+        "nota_per_orientarsi": "Si accede a questa stanza proseguendo dalle sale interne adiacenti alla Sala XI, all'interno della sezione terminale del percorso espositivo del palazzo.",
+        "descrizione": "Ambiente caratterizzato da pareti interamente rivestite da una tappezzeria in una calda tonalità rosso con una texture a bande verticali. Il pavimento mantiene il parquet a listoni dalle calde sfumature rossastre. L'arredamento è caratterizzato da un set coordinato di divani e poltrone d'epoca in legno scuro, finemente rivestiti con un tessuto verde brillante"
+      } 
+    },
+    
+    "mappa_generale":"/media/musei/NapoleonicoRoma/MappaNapoleonico.webp",
+
+    "icona": "/media/musei/NapoleonicoRoma/LogoNapoleonico.webp",
+
+    "indicazioni_utili": {
+      "entrata": "portone principale su Piazza di Ponte Umberto I.",
+      "bagni": "",
+      "uscita": "Coincide con il portone principale su Piazza di Ponte Umberto I.",
+      "uscite_emergenza": "A Sud della sala 7, seguire le indicazioni al di sopra delle porte"
+    },
+    "colori": {
+      "primario": "#1b365d",
+      "secondario": "#8b0000",
+      "terziario": "#c5a059",
+      "sfondo": "#878a8b"
+    },
+    "social": {
+      "descrizione": "Il Museo Napoleonico fa parte del Sistema Musei di Roma Capitale. La presenza social è integrata in un ecosistema unico che valorizza la rete dei Musei Civici attraverso rubriche, contest e contenuti multimediali condivisi.",
+      "facebook": "https://www.facebook.com/MuseiinComuneRoma",
+      "instagram": "https://www.instagram.com/museiincomuneroma",
+      "twitter": "https://twitter.com/museincomune",
+      "youtube": "https://www.youtube.com/user/MuseiInComune"
+    }
+  },
+  {
+    "id_museo": "museo_louvre",
+    "nome": "Placeholder Louvre",
+    "immagine": ".jpg",
+    "citta": "Parigi",
+    "costo": "52 €",
+    "info_generali": "",
+    "indirizzi": {
+      "via": "",
+      "cap": "",
+      "provincia": ""
+    },
+    "orari": "",
+    "struttura_sale": {
+      "sala_1": {
+        "nome": "",
+        "collocazione": "",
+        "nota_per_orientarsi": "",
+        "descrizione": ""
+      },
+      "sala_2": {
+        "nome": "",
+        "collocazione": "",
+        "nota_per_orientarsi": "",
+        "descrizione": ""
+      }
+    },
+    "indicazioni_utili": {
+      "bagni": "",
+      "uscita": ""
+    },
+    "colori": {
+      "primario": "",
+      "secondario": "",
+      "terziario": "",
+      "sfondo": ""
+    }
+  },
+  {
+    "id_museo": "pinacoteca_nazionale_bologna",
+    "nome": "Placeholder Pinacoteca Nazionale",
+    "immagine": ".jpg",
+    "citta": "Bologna",
+    "costo": "",
+    "info_generali": "",
+    "indirizzi": {
+      "via": "",
+      "cap": "",
+      "provincia": ""
+    },
+    "orari": "",
+    "struttura_sale": {
+      "sala_1": {
+        "nome": "",
+        "collocazione": "",
+        "nota_per_orientarsi": "",
+        "descrizione": ""
+      },
+      "sala_2": {
+        "nome": "",
+        "collocazione": "",
+        "nota_per_orientarsi": "",
+        "descrizione": ""
+      }
+    },
+    "indicazioni_utili": {
+      "bagni": "",
+      "uscita": ""
+    },
+    "colori": {
+      "primario": "",
+      "secondario": "",
+      "terziario": "",
+      "sfondo": ""
+    }
+  },
+  {
+    "id_museo": "uffizi_firenze",
+    "nome": "Placeholder Galleria degli Uffizi",
+    "immagine": ".jpg",
+    "citta": "Firenze",
+    "costo": "",
+    "info_generali": "",
+    "indirizzi": {
+      "via": "",
+      "cap": "",
+      "provincia": ""
+    },
+    "orari": "",
+    "struttura_sale": {
+      "sala_1": {
+        "nome": "",
+        "collocazione": "",
+        "nota_per_orientarsi": "",
+        "descrizione": ""
+      },
+      "sala_2": {
+        "nome": "",
+        "collocazione": "",
+        "nota_per_orientarsi": "",
+        "descrizione": ""
+      }
+    },
+    "indicazioni_utili": {
+      "bagni": "",
+      "uscita": ""
+    },
+    "colori": {
+      "primario": "",
+      "secondario": "",
+      "terziario": "",
+      "sfondo": ""
+    }
+  },
+  {
+    "id_museo": "musei_capitolini_roma",
+    "nome": "Placeholder Musei Capitolini",
+    "immagine": ".jpg",
+    "citta": "Roma",
+    "costo": "",
+    "info_generali": "",
+    "indirizzi": {
+      "via": "",
+      "cap": "",
+      "provincia": ""
+    },
+    "orari": "",
+    "struttura_sale": {
+      "sala_1": {
+        "nome": "",
+        "collocazione": "",
+        "nota_per_orientarsi": "",
+        "descrizione": ""
+      },
+      "sala_2": {
+        "nome": "",
+        "collocazione": "",
+        "nota_per_orientarsi": "",
+        "descrizione": ""
+      }
+    },
+    "indicazioni_utili": {
+      "bagni": "",
+      "uscita": ""
+    },
+    "colori": {
+      "primario": "",
+      "secondario": "",
+      "terziario": "",
+      "sfondo": ""
+    }
+  },
+  {
+    "id_museo": "galleria_borghese_roma",
+    "nome": "Placeholder Galleria Borghese",
+    "immagine": ".jpg",
+    "citta": "Roma",
+    "costo": "",
+    "info_generali": "",
+    "indirizzi": {
+      "via": "",
+      "cap": "",
+      "provincia": ""
+    },
+    "orari": "",
+    "struttura_sale": {
+      "sala_1": {
+        "nome": "",
+        "collocazione": "",
+        "nota_per_orientarsi": "",
+        "descrizione": ""
+      },
+      "sala_2": {
+        "nome": "",
+        "collocazione": "",
+        "nota_per_orientarsi": "",
+        "descrizione": ""
+      }
+    },
+    "indicazioni_utili": {
+      "bagni": "",
+      "uscita": ""
+    },
+    "colori": {
+      "primario": "",
+      "secondario": "",
+      "terziario": "",
+      "sfondo": ""
+    }
+  },
+  {
+    "id_museo": "museo_civico_bassano",
+    "nome": "Placeholder Museo Civico di Bassano del Grappa",
+    "immagine": ".jpg",
+    "citta": "Bassano del Grappa",
+    "costo": "",
+    "info_generali": "",
+    "indirizzi": {
+      "via": "",
+      "cap": "",
+      "provincia": ""
+    },
+    "orari": "",
+    "struttura_sale": {
+      "sala_1": {
+        "nome": "",
+        "collocazione": "",
+        "nota_per_orientarsi": "",
+        "descrizione": ""
+      },
+      "sala_2": {
+        "nome": "",
+        "collocazione": "",
+        "nota_per_orientarsi": "",
+        "descrizione": ""
+      }
+    },
+    "indicazioni_utili": {
+      "bagni": "",
+      "uscita": ""
+    },
+    "colori": {
+      "primario": "",
+      "secondario": "",
+      "terziario": "",
+      "sfondo": ""
+    }
+  },
+  {
+    "id_museo": "fellini_museum_rimini",
+    "nome": "Placeholder Fellini Museum",
+    "immagine": ".jpg",
+    "citta": "Rimini",
+    "costo": "",
+    "info_generali": "",
+    "indirizzi": {
+      "via": "",
+      "cap": "",
+      "provincia": ""
+    },
+    "orari": "",
+    "struttura_sale": {
+      "sala_1": {
+        "nome": "",
+        "collocazione": "",
+        "nota_per_orientarsi": "",
+        "descrizione": ""
+      },
+      "sala_2": {
+        "nome": "",
+        "collocazione": "",
+        "nota_per_orientarsi": "",
+        "descrizione": ""
+      }
+    },
+    "indicazioni_utili": {
+      "bagni": "",
+      "uscita": ""
+    },
+    "colori": {
+      "primario": "",
+      "secondario": "",
+      "terziario": "",
+      "sfondo": ""
+    }
+  }
+]

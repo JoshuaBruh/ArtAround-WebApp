@@ -1,0 +1,1704 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArtAround - Editor & Marketplace</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="js/app-store.js"></script>
+    <script src="js/gestoremusei.js"></script>
+    <script src="js/gestorelibreria.js"></script>
+    <script src="js/gestoreopera.js"></script>
+    <script src="js/gestorevisita.js"></script>
+    <script src="js/gestorevisitaform.js"></script>
+    <script src="js/gestoremessaggi.js"></script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body class="bg-light d-flex flex-column min-vh-100" x-data>
+
+
+    <!-- NAVBAR HEADER -->
+    <nav class="navbar navbar-dark bg-dark mb-4 shadow-sm" x-show="$store.app.utente" x-cloak>
+        <div class="container-fluid d-flex justify-content-between align-items-center flex-nowrap py-1">
+
+
+            <a class="navbar-brand d-flex align-items-center gap-2 fs-5 text-truncate me-2" href="#"
+                @click.prevent="$store.app.cambiaMuseo()" title="Torna alla selezione museo">
+                <i class="bi" :class="$store.app.utente?.ruolo === 'autore' ? 'bi-palette2' : 'bi-shop'"></i>
+                <span class="fw-bold"
+                    x-text="$store.app.utente?.ruolo === 'autore' ? 'ArtAround Editor' : 'ArtAround Marketplace'"></span>
+            </a>
+
+
+            <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                <!-- Badge Ruolo + Username su schermi medio/grandi -->
+                <div class="text-end d-none d-sm-block">
+                    <span class="badge text-uppercase small me-1"
+                        :class="$store.app.utente?.ruolo === 'autore' ? 'bg-primary' : 'bg-success'"
+                        x-text="$store.app.utente?.ruolo">
+                    </span>
+                    <span class="text-white-50 fw-semibold small" x-text="$store.app.utente?.username"></span>
+                </div>
+
+
+                <span class="text-white-50 fw-semibold small d-sm-none text-truncate" style="max-width: 80px;"
+                    x-text="$store.app.utente?.username"></span>
+
+                <!-- Tasto Logout -->
+                <button class="btn btn-outline-light btn-sm d-flex align-items-center gap-1"
+                    @click="$store.app.logout()" aria-label="Esci dall'applicazione">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span class="d-none d-sm-inline">Esci</span>
+                </button>
+            </div>
+
+        </div>
+    </nav>
+
+
+
+    <main class="container">
+
+
+
+        <!-- VISTA 1: Login -->
+        <template x-if="!$store.app.utente">
+            <div class="row justify-content-center mt-5">
+                <div class="col-md-5">
+                    <div class="card shadow-sm">
+                        <div class="card-body p-4">
+                            <h3 class="card-title text-center mb-4">Accedi all'Editor - Marketplace</h3>
+
+                            <form @submit.prevent="$store.app.login()">
+                                <div class="mb-3">
+                                    <label class="form-label">Username</label>
+                                    <input type="text" class="form-control" x-model="$store.app.formLogin.username"
+                                        required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Password</label>
+                                    <input type="password" class="form-control" x-model="$store.app.formLogin.password"
+                                        required>
+                                </div>
+
+                                <template x-if="$store.app.erroreLogin">
+                                    <div class="alert alert-danger p-2 fs-6 mb-3" x-text="$store.app.erroreLogin"></div>
+                                </template>
+
+                                <button type="submit" class="btn btn-primary w-100">Accedi</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+
+
+        <!-- VISTA 2: SELEZIONE MUSEO -->
+        <template x-if="$store.app.utente && !$store.app.museoSelezionato">
+            <div x-data="gestoreMusei()">
+                <h2 class="mb-1"
+                    x-text="$store.app.utente.ruolo === 'autore' ? 'Seleziona un museo su cui lavorare' : 'Seleziona un museo da visitare'">
+                </h2>
+                <p class="text-muted mb-4"
+                    x-text="$store.app.utente.ruolo === 'autore' ? 'Scegli la struttura di cui vuoi gestire i contenuti.' : 'Scegli la struttura che vuoi esplorare.'">
+                </p>
+
+                <!-- FILTRI DI RICERCA -->
+                <div class="row g-3 mb-4">
+                    <!-- BARRA RICERCA MUSEI -->
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" placeholder="Cerca museo per nome" x-model="ricerca">
+                    </div>
+
+                    <!-- DROPDOWN SEARCHABLE CITTÀ -->
+                    <div class="col-md-4 position-relative" @click.outside="menuCittaAperto = false">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Filtra per città..."
+                                x-model="filtroCittaInput" @focus="menuCittaAperto = true" @input="menuCittaAperto = true;
+                                    if (filtroCittaInput !== cittaSelezionata) cittaSelezionata = '';">
+
+                            <button class="btn btn-outline-secondary" type="button"
+                                x-show="cittaSelezionata || filtroCittaInput" @click="resetCitta()"
+                                aria-label="Azzera filtro città">
+                                ✕
+                            </button>
+                        </div>
+
+                        <!-- MENU TENDINA SCROLLABILE -->
+                        <div x-show="menuCittaAperto" class="dropdown-menu show w-100 shadow mt-1 p-0"
+                            style="max-height: 220px; overflow-y: auto; z-index: 1050;">
+
+                            <a class="dropdown-item py-2 border-bottom" href="#" @click.prevent="resetCitta()">
+                                <em>Tutte le città</em>
+                            </a>
+
+                            <template x-for="citta in cittaFiltrate" :key="citta">
+                                <a class="dropdown-item py-2" :class="{ 'active': cittaSelezionata === citta }" href="#"
+                                    @click.prevent="selezionaCitta(citta)" x-text="citta">
+                                </a>
+                            </template>
+
+                            <div x-show="cittaFiltrate.length === 0" class="p-2 text-muted small text-center">
+                                Nessuna città trovata
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- INDICATORE DI CARICAMENTO -->
+                <div x-show="caricamento" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Caricamento in corso...</span>
+                    </div>
+                </div>
+
+                <!-- NESSUN RISULTATO -->
+                <div x-show="!caricamento && musei.length === 0" class="alert alert-info text-center my-4">
+                    Nessun museo trovato con i criteri selezionati.
+                </div>
+
+                <!-- GRIGLIA MUSEI -->
+                <div x-show="!caricamento && musei.length > 0"
+                    class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-3 g-4">
+                    <!-- L'elenco musei è stato locale di ricerca: sta nel componente, non nello store -->
+                    <template x-for="museo in musei" :key="museo.id_museo">
+                        <div class="col">
+                            <div class="card h-100 shadow-sm overflow-hidden">
+                                <img :src="museo.immagine || '/media/placeholder.jpg'"
+                                    class="card-img-top object-fit-contain bg-light p-2" style="height: 180px;"
+                                    :alt="museo.nome" loading="lazy"
+                                    onerror="this.onerror=null; this.src='/media/placeholder.jpg'">
+
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title" x-text="museo.nome"></h5>
+                                    <p class="card-text mb-auto">
+                                        <small class="text-secondary" x-text="museo.citta"></small>
+                                    </p>
+
+                                    <!-- Il pulsante usa ancora $store.app.selezionaMuseo per salvare lo stato globale -->
+                                    <button class="btn btn-outline-primary w-100 mt-3"
+                                        @click="$store.app.selezionaMuseo(museo)"
+                                        x-text="$store.app.utente.ruolo === 'autore' ? 'Gestisci Museo →' : 'Sfoglia le Visite →'">
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- CONTROLLI PAGINAZIONE -->
+                <div x-show="!caricamento && pagineTotali > 1"
+                    class="d-flex justify-content-center align-items-center gap-3 gap-sm-3 mt-4">
+                    <button class="btn btn-outline-secondary" @click="paginaPrecedente()" :disabled="pagina === 1">
+                        &laquo; Precedente
+                    </button>
+                    <span class="text-muted small text-nowrap">
+                        Pagina <strong x-text="pagina"></strong> di <strong x-text="pagineTotali"></strong>
+                    </span>
+                    <button class="btn btn-outline-secondary" @click="paginaSuccessiva()"
+                        :disabled="pagina >= pagineTotali">
+                        Successiva &raquo;
+                    </button>
+                </div>
+            </div>
+        </template>
+
+
+
+        <!--- VISTA 3: MUSEO SELEZIONATO -->
+        <template x-if="$store.app.utente && $store.app.museoSelezionato">
+            <div class="bg-white border-bottom mb-4 py-2">
+                <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+                    <!-- 1. NOME MUSEO -->
+                    <button class="btn btn-link p-0 text-decoration-none fw-bold text-dark text-truncate order-1 me-2"
+                        style="max-width: 55%;" @click="$store.app.NuovaVista('dettaglio_museo')"
+                        title="Vai al dettaglio museo">
+                        <span x-text="$store.app.museoSelezionato?.nome"></span>
+                    </button>
+
+                    <!-- 2. PULSANTE CAMBIA MUSEO -->
+                    <button class="btn btn-sm btn-outline-secondary order-2 order-md-3 ms-auto ms-md-2 flex-shrink-0"
+                        @click="$store.app.cambiaMuseo()">
+                        Cambia museo
+                    </button>
+
+                    <!-- 3. MENU OPZIONI -->
+                    <div class="order-3 order-md-2 col-12 col-md-auto ms-md-auto pt-1 pt-md-0">
+
+                        <!-- Menu Autore -->
+                        <template x-if="$store.app.utente?.ruolo === 'autore'">
+                            <div
+                                class="d-flex flex-wrap gap-1 w-100 w-md-auto justify-content-center justify-content-md-end">
+                                <button class="btn btn-sm btn-outline-primary flex-fill flex-md-grow-0"
+                                    :class="{ 'active': $store.app.vista === 'libreria' }"
+                                    @click="$store.app.NuovaVista('libreria')">Libreria</button>
+                                <button class="btn btn-sm btn-outline-primary flex-fill flex-md-grow-0"
+                                    :class="{ 'active': $store.app.vista === 'creaContenuto' }"
+                                    @click="$store.app.NuovaVista('creaContenuto')">+ Contenuto</button>
+                                <button class="btn btn-sm btn-outline-primary flex-fill flex-md-grow-0"
+                                    :class="{ 'active': $store.app.vista === 'editorVisite' }"
+                                    @click="$store.app.NuovaVista('editorVisite')">+ Visita</button>
+                                <button class="btn btn-sm btn-outline-primary flex-fill flex-md-grow-0"
+                                    :class="{ 'active': $store.app.vista === 'pubblicazioni' }"
+                                    @click="$store.app.NuovaVista('pubblicazioni')">Vendite & Licenze</button>
+                            </div>
+                        </template>
+
+                        <!-- Menu Visitatore -->
+                        <template x-if="$store.app.utente?.ruolo === 'visitatore'">
+                            <div
+                                class="d-flex flex-wrap gap-1 w-100 w-md-auto justify-content-center justify-content-md-end">
+                                <button class="btn btn-sm btn-outline-success flex-fill flex-md-grow-0"
+                                    :class="{ 'active': $store.app.vista === 'marketplace' }"
+                                    @click="$store.app.NuovaVista('marketplace')">Marketplace</button>
+                                <button class="btn btn-sm btn-outline-success flex-fill flex-md-grow-0"
+                                    :class="{ 'active': $store.app.vista === 'mieVisite' }"
+                                    @click="$store.app.NuovaVista('mieVisite')">Adottate</button>
+                            </div>
+                        </template>
+                    </div>
+
+                </div>
+            </div>
+        </template>
+
+
+
+        <!-- VISTA 4: DETTAGLIO MUSEO -->
+        <template x-if="$store.app.utente && $store.app.museoSelezionato && $store.app.vista === 'dettaglio_museo'">
+            <div class="card border-primary shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">🏛️ Museo In Gestione</span>
+                </div>
+
+                <div class="card-body p-4">
+                    <!-- Nome -->
+                    <h3 class="card-title text-primary mb-2" x-text="$store.app.museoSelezionato.nome"></h3>
+
+                    <!-- Città-->
+                    <p class="text-secondary mb-3">
+                        <strong>Città:</strong>
+                        <span
+                            x-text="$store.app.museoSelezionato.citta || $store.app.museoSelezionato['citta'] || $store.app.museoSelezionato.indirizzi?.citta || 'Non specificata'"></span>
+                    </p>
+
+                    <hr>
+
+                    <!-- Info Generali -->
+                    <div class="mt-3">
+                        <h6 class="fw-bold text-dark">Informazioni Generali:</h6>
+                        <p class="card-text text-muted"
+                            x-text="$store.app.museoSelezionato.info_generali || 'Nessuna descrizione disponibile.'">
+                        </p>
+                    </div>
+
+                    <!-- Indirizzo e Orari -->
+                    <template x-if="$store.app.museoSelezionato.orari">
+                        <div class="alert alert-info mt-3 mb-0 p-2 small">
+                            <strong>Orari:</strong> <span x-text="$store.app.museoSelezionato.orari"></span>
+                        </div>
+                    </template>
+                    <template x-if="$store.app.museoSelezionato.indirizzi">
+                        <div class="alert alert-info mt-2 mb-0 p-2 small">
+                            <strong>Indirizzo:</strong>
+                            <span x-text="$store.app.museoSelezionato.indirizzi.via || 'Non specificato'"></span>,
+                            <span x-text="$store.app.museoSelezionato.indirizzi.cap || ''"></span>,
+                            <span x-text="$store.app.museoSelezionato.indirizzi.provincia || ''"></span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </template>
+
+
+
+        <!-- VISTA 5: LIBRERIA -->
+        <template x-if="$store.app.utente && $store.app.museoSelezionato && $store.app.vista === 'libreria'">
+            <div class="container-fluid py-3" x-data="gestoreLibreria()">
+
+                <!-- HEADER DELLA PAGINA -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h3 class="fw-bold text-primary mb-1">Catalogo Opere e Contenuti</h3>
+                        <p class="text-muted small m-0">
+                            Contenuti Presenti nel: <strong x-text="$store.app.museoSelezionato.nome"></strong>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- BARRA DI RICERCA E FILTRI -->
+                <div class="card p-3 mb-4 shadow-sm bg-light border-0">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label fw-bold small">Ricerca per titolo o ID</label>
+                            <input type="text" class="form-control"
+                                placeholder="Cerca opera, artista, movimento, tecnica..." x-model="ricerca">
+                        </div>
+                        <!-- Checkbox / Switch Ordine Alfabetico -->
+                        <div class="col-12 col-md-2">
+                            <div class="form-check form-switch pb-2">
+                                <input class="form-check-input" type="checkbox" id="switchAlfabetico"
+                                    x-model="ordinaAlfabetico">
+                                <label class="form-check-label fw-bold small" for="switchAlfabetico">
+                                    Ordine A-Z
+                                </label>
+                            </div>
+                        </div>
+                        <!-- Filtro Sala con Nomi Reali -->
+                        <div class="col-12 col-md-3">
+                            <label class="form-label fw-bold small">Filtra per Sala</label>
+                            <select class="form-select" :value="filtroSala" @change="cambiaSala($event)"
+                                :disabled="tipo !== 'opera'">
+                                <option value="">Tutte le sale</option>
+                                <template x-for="sala in $store.app.saleDisponibili" :key="sala.id">
+                                    <option :value="sala.id" x-text="sala.nome"></option>
+                                </template>
+                            </select>
+                        </div>
+
+
+                        <!-- Filtro Tipo Contenuto -->
+                        <div class="col-12 col-md-3">
+                            <label class="form-label fw-bold small">Tipo Contenuto</label>
+                            <select class="form-select" x-model="tipo">
+                                <option value="opera">Solo Opere</option>
+                                <option value="artista">Solo Artisti</option>
+                                <option value="movimento">Solo Movimenti</option>
+                                <option value="tecnica">Solo Tecniche</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- BOX DETTAGLIO SALA -->
+                    <template x-if="salaSelezionataInfo">
+                        <div class="mt-3 p-3 bg-white border rounded-3 shadow-sm">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="fw-bold text-primary m-0" x-text="salaSelezionataInfo.nome"></h6>
+                                <span class="badge bg-light text-dark border"
+                                    x-text="salaSelezionataInfo.collocazione"></span>
+                            </div>
+
+                            <p class="small text-secondary mb-2" x-text="salaSelezionataInfo.descrizione"></p>
+
+                            <template x-if="salaSelezionataInfo.nota_per_orientarsi">
+                                <div class="alert alert-warning py-1 px-2 mb-0 small d-flex align-items-center gap-2">
+                                    <div>
+                                        <strong>Nota per l'orientamento:</strong> <span
+                                            x-text="salaSelezionataInfo.nota_per_orientarsi"></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+
+
+                <!-- CARICAMENTO -->
+                <template x-if="caricamento">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="text-muted mt-2">Caricamento contenuti in corso...</p>
+                    </div>
+                </template>
+
+                <!-- CONTENUTI DIVISI PER TIPOLOGIA -->
+                <template x-if="!caricamento">
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="d-flex align-items-center">
+                                <!-- MAPPATURA PULITA PER IL TITOLO PLURALE -->
+                                <h4 class="fw-bold m-0 me-2"
+                                    x-text="{ opera: 'Opere', artista: 'Artisti', movimento: 'Movimenti', tecnica: 'Tecniche' }[tipo] || tipo">
+                                </h4>
+                                <span class="badge bg-primary rounded-pill" x-text="totale"></span>
+                            </div>
+                        </div>
+
+                        <template x-if="elementi.length === 0">
+                            <div class="alert alert-secondary text-center py-3">
+                                Nessun elemento trovato per i criteri di ricerca selezionati.
+                            </div>
+                        </template>
+
+                        <!-- ================= 1. SEZIONE OPERE ================= -->
+                        <template x-if="tipo === 'opera' && elementi.length > 0">
+                            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4 mb-4">
+                                <template x-for="opera in elementi" :key="opera.id_oggetto">
+                                    <div class="col">
+                                        <div class="card h-100 shadow-sm border-0">
+                                            <div class="position-relative overflow-hidden"
+                                                style="height: 280px; border-radius: 0.375rem 0.375rem 0 0;">
+                                                <img :src="opera.immagine || '/media/placeholder.jpg'"
+                                                    class="w-100 h-100 object-fit-cover" :alt="opera.titolo"
+                                                    style="object-position: top;" loading="lazy"
+                                                    onerror="this.onerror=null; this.src='/media/placeholder.jpg'">
+                                                <span class="position-absolute top-0 end-0 bg-dark text-white badge m-2"
+                                                    x-text="opera.id_oggetto"></span>
+                                            </div>
+
+                                            <div class="card-body d-flex flex-column p-3">
+                                                <h5 class="card-title fw-bold text-dark mb-2" x-text="opera.titolo">
+                                                </h5>
+
+                                                <div class="small mb-2">
+                                                    <template x-if="opera.id_artista">
+                                                        <div class="text-truncate mb-1">
+                                                            <span class="text-muted">Artista:</span>
+                                                            <span class="text-dark fw-bold"
+                                                                x-text="formattaCorrelato(opera.id_artista)"></span>
+                                                        </div>
+                                                    </template>
+
+                                                    <template x-if="opera.id_movimento">
+                                                        <div class="text-truncate mb-1">
+                                                            <span class="text-muted">Movimento:</span>
+                                                            <span class="text-dark fw-bold"
+                                                                x-text="formattaCorrelato(opera.id_movimento)"></span>
+                                                        </div>
+                                                    </template>
+
+                                                    <template x-if="opera.id_tecnica">
+                                                        <div class="text-truncate mb-1">
+                                                            <span class="text-muted">Tecnica:</span>
+                                                            <span class="text-dark fw-bold"
+                                                                x-text="formattaCorrelato(opera.id_tecnica)"></span>
+                                                        </div>
+                                                    </template>
+
+                                                    <template x-if="opera.id_autore">
+                                                        <div class="text-truncate mb-1">
+                                                            <span class="text-muted">Redatto da:</span>
+                                                            <span class="text-dark fw-bold"
+                                                                x-text="opera.id_autore"></span>
+                                                        </div>
+                                                    </template>
+                                                </div>
+
+                                                <div
+                                                    class="bg-light p-2 rounded-2 mb-3 border-start border-3 border-primary">
+                                                    <div class="small fw-bold text-dark mb-1">
+                                                        <span x-text="getNomeSala(opera.id_sala)"></span>
+                                                    </div>
+                                                    <div class="small text-muted"
+                                                        x-show="opera.posizione && opera.posizione.trim() !== ''">
+                                                        <em>Posizione:</em> <span x-text="opera.posizione"></span>
+                                                    </div>
+                                                </div>
+
+
+                                                <!--Pulsanti Modifica e +Visita -->
+                                                <div class="mt-auto pt-2 border-top d-flex gap-2">
+                                                    <button class="btn btn-sm btn-outline-primary flex-fill"
+                                                        @click="$store.app.modificaOpera(opera)">
+                                                        Modifica
+                                                    </button>
+
+                                                    <div class="position-relative flex-fill"
+                                                        @click.outside="menuVisitaApertoPer = null">
+                                                        <button type="button"
+                                                            class="btn btn-sm btn-outline-success w-100"
+                                                            @click.stop="apriMenuVisita(opera)">
+                                                            + Visita
+                                                        </button>
+
+                                                        <div x-show="menuVisitaApertoPer === opera.id_oggetto"
+                                                            class="dropdown-menu show shadow"
+                                                            style="position: absolute; top: 100%; right: 0; margin-top: 4px; z-index: 1050; min-width: 220px;">
+
+                                                            <button type="button" class="dropdown-item fw-bold"
+                                                                @click="nuovaVisitaConOpera(opera)">
+                                                                <i class="bi bi-plus-circle me-1"></i> Nuova Visita
+                                                            </button>
+
+                                                            <div class="dropdown-divider"
+                                                                x-show="bozzeDisponibili.length > 0"></div>
+
+                                                            <template x-if="caricamentoBozze">
+                                                                <div class="px-3 py-2 small text-muted">Caricamento
+                                                                    bozze...</div>
+                                                            </template>
+
+                                                            <template
+                                                                x-if="!caricamentoBozze && bozzeDisponibili.length === 0">
+                                                                <div class="px-3 py-2 small text-muted">Nessuna bozza
+                                                                    disponibile</div>
+                                                            </template>
+
+                                                            <template x-for="bozza in bozzeDisponibili"
+                                                                :key="bozza.id_visita">
+                                                                <button type="button" class="dropdown-item small"
+                                                                    @click="aggiungiOperaABozza(opera, bozza)">
+                                                                    <span x-text="bozza.titolo"></span>
+                                                                    <span class="text-muted"
+                                                                        x-text="' (' + (bozza.tappe?.length || 0) + ' tappe)'"></span>
+                                                                </button>
+                                                            </template>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+
+                        <!-- ================= 2. SEZIONE ARTISTI ================= -->
+                        <template x-if="tipo === 'artista' && elementi.length > 0">
+                            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4 mb-4">
+                                <template x-for="artista in elementi" :key="artista.id_oggetto">
+                                    <div class="col">
+                                        <div class="card h-100 shadow-sm border-0">
+                                            <div class="card-body d-flex flex-column">
+                                                <div
+                                                    class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                                    <h5 class="card-title fw-bold m-0" x-text="artista.titolo"></h5>
+                                                    <span class="badge bg-dark flex-shrink-0"
+                                                        x-text="artista.id_oggetto"></span>
+                                                </div>
+
+                                                <template x-if="artista.id_autore">
+                                                    <div class="small text-truncate mb-1">
+                                                        <span class="text-muted">Redatto da:</span>
+                                                        <span class="text-dark fw-bold"
+                                                            x-text="artista.id_autore"></span>
+                                                    </div>
+                                                </template>
+
+                                                <div class="mt-auto pt-3 border-top">
+                                                    <button class="btn btn-sm btn-outline-primary w-100"
+                                                        @click="$dispatch('apri-subform', { tipo: 'artista', elemento: artista, targetField: '' })">
+                                                        Modifica
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+
+                        <!-- ================= 3. SEZIONE MOVIMENTI ================= -->
+                        <template x-if="tipo === 'movimento' && elementi.length > 0">
+                            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4 mb-4">
+                                <template x-for="movimento in elementi" :key="movimento.id_oggetto">
+                                    <div class="col">
+                                        <div class="card h-100 shadow-sm border-0">
+                                            <div class="card-body d-flex flex-column">
+                                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                                    <h5 class="card-title fw-bold m-0" x-text="movimento.titolo"></h5>
+                                                    <span class="badge bg-dark flex-shrink-0"
+                                                        x-text="movimento.id_oggetto"></span>
+                                                </div>
+                                                <template x-if="movimento.id_autore">
+                                                    <div class="small text-truncate mb-1">
+                                                        <span class="text-muted">Redatto da:</span>
+                                                        <span class="text-dark fw-bold"
+                                                            x-text="movimento.id_autore"></span>
+                                                    </div>
+                                                </template>
+                                                <div class="mt-auto pt-3 border-top">
+                                                    <button class="btn btn-sm btn-outline-primary w-100"
+                                                        @click="$dispatch('apri-subform', { tipo: 'movimento', elemento: movimento, targetField: 'id_movimento' })">
+                                                        Modifica
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                        <!-- ================= 4. SEZIONE TECNICHE ================= -->
+                        <template x-if="tipo === 'tecnica' && elementi.length > 0">
+                            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4 mb-4">
+                                <template x-for="tecnica in elementi" :key="tecnica.id_oggetto">
+                                    <div class="col">
+                                        <div class="card h-100 shadow-sm border-0">
+                                            <div class="card-body d-flex flex-column p-3">
+                                                <div
+                                                    class="d-flex justify-content-between align-items-start gap-2 mb-3">
+                                                    <h5 class="card-title fw-bold text-dark m-0"
+                                                        x-text="tecnica.titolo"></h5>
+                                                    <span class="badge bg-dark flex-shrink-0"
+                                                        x-text="tecnica.id_oggetto"></span>
+                                                </div>
+                                                <template x-if="tecnica.id_autore">
+                                                    <div class="small text-truncate mb-1">
+                                                        <span class="text-muted">Redatto da:</span>
+                                                        <span class="text-dark fw-bold"
+                                                            x-text="tecnica.id_autore"></span>
+                                                    </div>
+                                                </template>
+                                                <div class="mt-auto pt-2 border-top">
+                                                    <button class="btn btn-sm btn-outline-primary w-100"
+                                                        @click="$dispatch('apri-subform', { tipo: 'tecnica', elemento: tecnica, targetField: 'id_tecnica' })">
+                                                        Modifica
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                        <!-- CONTROLLI DI PAGINAZIONE -->
+                        <template x-if="pagineTotali > 1">
+                            <div
+                                class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 pt-3 border-top">
+                                <span class="text-muted small">
+                                    Pagina <strong x-text="pagina"></strong> di <strong x-text="pagineTotali"></strong>
+                                    <span class="d-none d-md-inline"></span>(Totale: <span x-text="totale"></span>
+                                    elementi) </span>
+                                </span>
+
+                                <ul class="pagination pagination-sm m-0 flex-wrap justify-content-center">
+                                    <!-- Tasto Precedente -->
+                                    <li class="page-item" :class="{ 'disabled': pagina <= 1 }">
+                                        <button class="page-link" @click="cambiaPagina(pagina - 1)"
+                                            aria-label="Precedente">
+                                            &laquo; <span class="d-none d-sm-inline">Precedente</span>
+                                        </button>
+                                    </li>
+
+                                    <!-- Numeri di Pagina -->
+                                    <template x-for="p in pagineTotali" :key="p">
+                                        <li class="page-item" :class="{ 'active': p === pagina }">
+                                            <button class="page-link" @click="cambiaPagina(p)" x-text="p"></button>
+                                        </li>
+                                    </template>
+
+                                    <!-- Tasto Successivo -->
+                                    <li class="page-item" :class="{ 'disabled': pagina >= pagineTotali }">
+                                        <button class="page-link" @click="cambiaPagina(pagina + 1)"
+                                            aria-label="Successivo">
+                                            <span class="d-none d-sm-inline">Successivo</span> &raquo;
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+        </template>
+
+
+
+        <!-- VISTA 6: CREAZIONE / MODIFICA OPERA -->
+        <template x-if="$store.app.utente && $store.app.museoSelezionato && $store.app.vista === 'creaContenuto'">
+            <div x-data="gestoreOpera()">
+
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 x-text="eModifica ? 'Modifica Opera' : 'Nuova Opera'"></h2>
+                        <p class="text-muted mb-0">Museo: <span x-text="$store.app.museoSelezionato.nome"></span></p>
+                    </div>
+                    <button type="button" class="btn btn-outline-secondary"
+                        @click="$store.app.vista = 'libreria'">Annulla</button>
+                </div>
+
+                <!-- Form Principale -->
+                <form @submit.prevent="salvaOpera()">
+                    <div class="mb-3 p-2 bg-light border rounded small text-muted">
+                        Non sai quale ID usare?
+                        <a href="https://www.wikidata.org" target="_blank" class="fw-bold">Cerca su Wikidata</a>
+                        e incolla il codice QID (es. <code>Q559676</code>), oppure inventane uno unico.
+                    </div>
+
+
+                    <div class="row g-3">
+                        <!-- 1. Titolo -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Titolo dell'Opera *</label>
+                            <input type="text" class="form-control" x-model="formData.titolo" required>
+                        </div>
+
+                        <!-- 2. ID / QID -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">ID / QID Opera *</label>
+                            <input type="text" class="form-control" x-model="formData.id_oggetto" :disabled="eModifica"
+                                required>
+                        </div>
+
+                        <!-- 3. Sala -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Sala di Collocazione</label>
+                            <select class="form-select" x-model="formData.id_sala">
+                                <option value="">-- Nessuna Sala / Non in mostra --</option>
+                                <template x-for="sala in $store.app.saleDisponibili" :key="sala.id || sala">
+                                    <option :value="sala.id || sala" x-text="sala.nome || sala.id || sala"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <!--3.1 Campo Posizione nella Sala -->
+                        <div class="col-md-6">
+                            <label class="block fw-bold mb-2">Posizione nella sala *</label>
+                            <input type="text" class="form-control" x-model="formData.posizione" required>
+                        </div>
+
+                        <!-- 4. Licenza -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Licenza *</label>
+                            <select class="form-select" x-model="formData.licenza" required>
+                                <option value="Pubblico dominio">Pubblico dominio</option>
+                                <option value="Tutti i diritti riservati">Tutti i diritti riservati</option>
+                            </select>
+                        </div>
+
+                        <!-- 5. URL Immagine -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">URL Immagine</label>
+                            <input type="text" class="form-control" x-model="formData.immagine"
+                                placeholder="/media/opere/... oppure https://...">
+                        </div>
+
+                        <!-- 6. Artista -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Artista</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" list="lista-artisti"
+                                    placeholder="Cerca artista..."
+                                    :value="$store.app.artisti.find(a => a.id_oggetto === formData.id_artista)?.titolo || ''"
+                                    @change="const trovato = $store.app.artisti.find(a => a.titolo === $event.target.value); formData.id_artista = trovato ? trovato.id_oggetto : ''">
+
+                                <datalist id="lista-artisti">
+                                    <template x-for="item in ($store.app.artisti || [])" :key="item.id_oggetto">
+                                        <option :value="item.titolo"></option>
+                                    </template>
+                                </datalist>
+                                <button type="button" class="btn btn-outline-primary"
+                                    @click="$dispatch('apri-subform', { tipo: 'artista', elemento: null, targetField: 'id_artista' })">+</button>
+                                <button type="button" class="btn btn-outline-secondary" :disabled="!formData.id_artista"
+                                    @click="$dispatch('apri-subform', { tipo: 'artista', elemento: $store.app.opere.find(i => i.id_oggetto === formData.id_artista), targetField: 'id_artista' })">Modifica</button>
+                            </div>
+                        </div>
+
+
+                        <!-- 7. Movimento Artistico -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Movimento Artistico</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" list="lista-movimenti"
+                                    placeholder="Cerca movimento..."
+                                    :value="$store.app.movimenti.find(m => m.id_oggetto === formData.id_movimento)?.titolo || ''"
+                                    @change="const trovato = $store.app.movimenti.find(m => m.titolo === $event.target.value); formData.id_movimento = trovato ? trovato.id_oggetto : ''">
+
+                                <datalist id="lista-movimenti">
+                                    <template x-for="item in ($store.app.movimenti || [])" :key="item.id_oggetto">
+                                        <option :value="item.titolo"></option>
+                                    </template>
+                                </datalist>
+
+                                <button type="button" class="btn btn-outline-primary"
+                                    @click="$dispatch('apri-subform', { tipo: 'movimento', elemento: null, targetField: 'id_movimento' })">+</button>
+                                <button type="button" class="btn btn-outline-secondary"
+                                    :disabled="!formData.id_movimento"
+                                    @click="$dispatch('apri-subform', { tipo: 'movimento', elemento: $store.app.movimenti.find(i => i.id_oggetto === formData.id_movimento), targetField: 'id_movimento' })">Modifica</button>
+                            </div>
+                        </div>
+
+                        <!-- 8. Tecnica -->
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Tecnica</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" list="lista-tecniche"
+                                    placeholder="Cerca tecnica..."
+                                    :value="$store.app.tecniche.find(t => t.id_oggetto === formData.id_tecnica)?.titolo || ''"
+                                    @change="const trovato = $store.app.tecniche.find(t => t.titolo === $event.target.value); formData.id_tecnica = trovato ? trovato.id_oggetto : ''">
+
+                                <datalist id="lista-tecniche">
+                                    <template x-for="item in ($store.app.tecniche || [])" :key="item.id_oggetto">
+                                        <option :value="item.titolo"></option>
+                                    </template>
+                                </datalist>
+
+                                <button type="button" class="btn btn-outline-primary"
+                                    @click="$dispatch('apri-subform', { tipo: 'tecnica', elemento: null, targetField: 'id_tecnica' })">+</button>
+                                <button type="button" class="btn btn-outline-secondary" :disabled="!formData.id_tecnica"
+                                    @click="$dispatch('apri-subform', { tipo: 'tecnica', elemento: $store.app.tecniche.find(i => i.id_oggetto === formData.id_tecnica), targetField: 'id_tecnica' })">Modifica</button>
+                            </div>
+                        </div>
+
+                        <!-- 9. Matrice Descrizioni dell'Opera -->
+                        <div class="col-12 mt-4">
+                            <h4 class="fw-bold mb-3">Descrizioni Opera</h4>
+                            <div class="row g-3">
+                                <template x-for="target in ['infantile', 'semplice', 'medio', 'avanzato']"
+                                    :key="target">
+                                    <div class="col-md-6">
+                                        <div class="card p-3 bg-light">
+                                            <h6 class="fw-bold text-capitalize text-primary" x-text="target"></h6>
+                                            <template x-for="durata in ['3s', '15s', '1m', '3m']" :key="durata">
+                                                <div class="mt-2">
+                                                    <label class="form-label small text-muted mb-1"
+                                                        x-text="'Durata: ' + durata"></label>
+                                                    <textarea class="form-control form-control-sm" rows="7"
+                                                        x-model="formData.descrizioni[target][durata].testo"></textarea>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="col-12 mt-4 d-flex gap-2 justify-content-end">
+                            <div x-show="eModifica" class="me-auto">
+                                <button type="button" class="btn btn-danger" @click="eliminaOperaForm()">
+                                    Elimina
+                                </button>
+                            </div>
+                            <button type="button" class="btn btn-secondary"
+                                @click="$store.app.vista = 'libreria'">Annulla</button>
+                            <button type="submit" class="btn btn-primary"
+                                x-text="eModifica ? 'Salva Modifiche Opera' : 'Salva Opera'"></button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </template>
+
+
+
+        <!-- VISTA 7: EDITOR VISITA, VISITE PUBBLICATE, MARKETPLACE, MIE VISITE -->
+        <template
+            x-if="$store.app.museoSelezionato && ['editorVisite', 'pubblicazioni', 'marketplace', 'mieVisite'].includes($store.app.vista)">
+            <div class="container-fluid py-3" x-data="gestoreVisita()">
+
+
+                <!-- HEADER DELLA PAGINA -->
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                    <div>
+                        <h3 class="fw-bold text-primary mb-1" x-text="titoloPagina"></h3>
+                        <p class="text-muted small m-0">
+                            <span x-text="sottotitoloPagina"></span> — <strong
+                                x-text="$store.app.museoSelezionato.nome"></strong>
+                        </p>
+                    </div>
+
+
+                    <div class="d-flex align-items-center gap-2">
+                        <!-- Badge Crediti -->
+                        <template x-if="['marketplace', 'mieVisite'].includes($store.app.vista) && $store.app.utente">
+                            <div
+                                class="badge bg-success-subtle text-success border border-success px-3 py-2 fs-6 rounded-pill">
+                                <i class="bi bi-wallet2 me-1"></i> Credito:
+                                <strong x-text="$store.app.utente?.credito || 0"></strong> Cr
+                            </div>
+                        </template>
+                        <!-- Badge Guadagni Totali -->
+                        <template x-if="$store.app.vista === 'pubblicazioni'">
+                            <div
+                                class="badge bg-primary-subtle text-primary border border-primary px-3 py-2 fs-6 rounded-pill">
+                                <i class="bi me-1"></i> Guadagno Totale:
+                                <strong x-text="$store.app.utente?.guadagno_totale || 0 "></strong>
+                                Cr
+                            </div>
+                        </template>
+                        <!-- Bottone Nuova Visita -->
+                        <template x-if="$store.app.vista === 'editorVisite'">
+                            <button class="btn btn-primary d-flex align-items-center gap-1" @click="creaNuovaVisita()">
+                                + Nuova Visita
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+
+                <!-- BARRA DI RICERCA -->
+                <div class="card p-3 mb-4 shadow-sm bg-light border-0">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-bold small text-muted mb-1">Ricerca per titolo o ID</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Cerca tra le visite..."
+                                    x-model="ricerca">
+                                <template x-if="ricerca.length > 0">
+                                    <button class="btn btn-outline-secondary" type="button" @click="ricerca = ''"
+                                        aria-label="Cancella testo ricerca">
+                                        ✕
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+
+
+                        <!-- Opzioni per Bozze -->
+                        <template x-if="$store.app.vista === 'editorVisite'">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-bold small text-muted mb-1">Ordina per</label>
+                                <select class="form-select" x-model="ordinamento">
+                                    <option value="modifica_desc">Ultima modifica (più recenti)</option>
+                                    <option value="modifica_asc">Ultima modifica (meno recenti)</option>
+                                    <option value="creazione_desc">Data creazione (più recenti)</option>
+                                    <option value="creazione_asc">Data creazione (meno recenti)</option>
+                                    <option value="titolo_asc">Titolo (A-Z)</option>
+                                </select>
+                            </div>
+                        </template>
+
+                        <!-- Opzioni per Pubblicazioni e Marketplace -->
+                        <template x-if="$store.app.vista !== 'editorVisite'">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label fw-bold small text-muted mb-1">Ordina per</label>
+                                <select class="form-select" x-model="ordinamento">
+                                    <option value="adozioni_desc">Più adottati</option>
+                                    <option value="pubblicazione_desc">Pubblicazione (più recenti)</option>
+                                    <option value="pubblicazione_asc">Pubblicazione (meno recenti)</option>
+                                    <option value="titolo_asc">Titolo (A-Z)</option>
+                                </select>
+                            </div>
+                        </template>
+
+                    </div>
+                </div>
+
+                <!-- CARICAMENTO -->
+                <template x-if="caricamentoVisite">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="text-muted mt-2">Caricamento visite in corso...</p>
+                    </div>
+                </template>
+
+                <!-- AVVISO LISTA VUOTA -->
+                <template x-if="!caricamentoVisite && visiteDaMostrare.length === 0">
+                    <div class="alert alert-secondary text-center py-4">
+                        Nessuna visita trovata in questa sezione.
+                    </div>
+                </template>
+
+                <!-- GRIGLIA CARD VISITE -->
+                <template x-if="!caricamentoVisite && visiteDaMostrare.length > 0">
+                    <div>
+                        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                            <template x-for="visita in visitePaginate" :key="visita.id_visita">
+                                <div class="col">
+                                    <div class="card h-100 shadow-sm border-0 overflow-hidden">
+
+                                        <!-- Immagine Copertina -->
+                                        <div class="position-relative bg-light" style="height: 320px;">
+                                            <img :src="getImmagineCopertina(visita)"
+                                                class="w-100 h-100 object-fit-cover" style="object-position: top;"
+                                                loading="lazy"
+                                                onerror="this.onerror=null; this.src='/media/placeholder.jpg'">
+
+                                            <span class="position-absolute top-0 end-0 badge bg-dark m-2 px-2 py-1">
+                                                <span x-text="visita.tappe ? visita.tappe.length : 0"></span> Tappe
+                                            </span>
+                                        </div>
+
+                                        <div class="card-body d-flex flex-column p-3">
+                                            <h5 class="card-title fw-bold text-dark mb-1" x-text="visita.titolo"></h5>
+                                            <p class="text-muted small mb-3 flex-grow-1"
+                                                x-text="visita.descrizione || 'Nessuna descrizione.'"></p>
+
+                                            <!-- INFO E STATISTICHE -->
+                                            <div
+                                                class="d-flex justify-content-between align-items-center mb-3 pt-2 border-top">
+                                                <span class="badge bg-primary text-wrap"
+                                                    x-text="visita.prezzo_crediti + ' Crediti'"></span>
+
+                                                <template x-if="$store.app.vista === 'pubblicazioni'">
+                                                    <span class="small text-success fw-bold">
+                                                        Adottata <span x-text="visita.adozioni_totali || 0"></span>
+                                                        volte
+                                                    </span>
+                                                </template>
+
+
+                                                <template
+                                                    x-if="$store.app.vista === 'marketplace' || $store.app.vista === 'mieVisite'">
+                                                    <span class="small text-success fw-bold">
+                                                        Creata da: <span x-text="visita.id_autore"></span>
+                                                    </span>
+                                                </template>
+
+
+                                                <span class="small text-muted"
+                                                    x-text="(visita.durata_stimata_minuti || 30) + ' min'"></span>
+                                            </div>
+
+                                            <!-- AZIONI DINAMICHE -->
+                                            <div class="mt-auto">
+
+                                                <!-- 1. EDITOR (Bozze) -->
+                                                <template x-if="$store.app.vista === 'editorVisite'">
+                                                    <div class="d-flex w-100 gap-2">
+                                                        <button class="btn btn-sm btn-outline-primary flex-fill"
+                                                            @click="modificaVisita(visita)">
+                                                            Modifica
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-success"
+                                                            @click="pubblicaVisita(visita)">
+                                                            Pubblica
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-danger"
+                                                            @click="eliminaVisita(visita.id_visita)">
+                                                            Elimina
+                                                        </button>
+                                                    </div>
+                                                </template>
+
+                                                <!-- 2. PUBBLICAZIONI -->
+                                                <template x-if="$store.app.vista === 'pubblicazioni'">
+                                                    <button class="btn btn-sm btn-warning w-100"
+                                                        @click="spubblicaVisita(visita)">
+                                                        Ritira dal Marketplace
+                                                    </button>
+                                                </template>
+
+                                                <!-- INFO PER VISITATORE -->
+
+
+                                                <!-- 3. MARKETPLACE -->
+                                                <template x-if="$store.app.vista === 'marketplace'">
+                                                    <div class="d-flex w-100 gap-2">
+                                                        <button class="btn btn-sm btn-outline-info "
+                                                            @click="apriDettaglioVisita(visita)">
+                                                            Info
+                                                        </button>
+                                                        <template
+                                                            x-if="$store.app.utente?.visite_adottate?.map(id => String(id)).includes(String(visita.id_visita))">
+                                                            <button class="btn btn-sm btn-secondary w-100" disabled>
+                                                                ✓ Già Acquistata
+                                                            </button>
+                                                        </template>
+                                                        <template
+                                                            x-if="!$store.app.utente?.visite_adottate?.map(id => String(id)).includes(String(visita.id_visita))">
+                                                            <button class="btn btn-sm btn-primary w-100"
+                                                                @click="adottaVisita(visita)">
+                                                                Adotta Visita (<span
+                                                                    x-text="visita.prezzo_crediti"></span>
+                                                                Cr)
+                                                            </button>
+                                                        </template>
+                                                    </div>
+                                                </template>
+
+                                                <!-- 4. LE MIE VISITE -->
+                                                <template x-if="$store.app.vista === 'mieVisite'">
+                                                    <div class="d-flex w-100 gap-2">
+                                                        <button class="btn btn-sm btn-outline-info "
+                                                            @click="apriDettaglioVisita(visita)">
+                                                            Info
+                                                        </button>
+                                                        <button class="btn btn-sm btn-success w-100 "
+                                                            @click="avviaNavigator(visita.id_visita)">
+                                                            Avvia Guida
+                                                        </button>
+                                                    </div>
+                                                </template>
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        <!-- CONTROLLI PAGINAZIONE -->
+                        <template x-if="pagineTotali > 1">
+                            <div
+                                class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 mt-4 pt-3 border-top">
+
+                                <!-- Testo Info Pagina -->
+                                <div class="text-muted small text-center text-sm-start text-nowrap">
+                                    Pagina <span class="fw-bold" x-text="pagina"></span> di <span class="fw-bold"
+                                        x-text="pagineTotali"></span>
+                                    <span class="d-none d-md-inline">
+                                        (<span x-text="visiteDaMostrare.length"></span> visite totali)
+                                    </span>
+                                </div>
+
+                                <!-- Bottoni Paginazione -->
+                                <nav>
+                                    <ul class="pagination pagination-sm mb-0 flex-wrap justify-content-center">
+
+                                        <li class="page-item" :class="{ 'disabled': pagina === 1 }">
+                                            <button class="page-link" @click="paginaPrecedente()" aria-label="Indietro">
+                                                &laquo; <span class="d-none d-sm-inline">Indietro</span>
+                                            </button>
+                                        </li>
+
+                                        <template x-for="p in pagineTotali" :key="p">
+                                            <li class="page-item" :class="{ 'active': pagina === p }">
+                                                <button class="page-link" @click="cambiaPagina(p)" x-text="p"></button>
+                                            </li>
+                                        </template>
+
+                                        <li class="page-item" :class="{ 'disabled': pagina === pagineTotali }">
+                                            <button class="page-link" @click="paginaSuccessiva()" aria-label="Avanti">
+                                                <span class="d-none d-sm-inline">Avanti</span> &raquo;
+                                            </button>
+                                        </li>
+
+                                    </ul>
+                                </nav>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+
+                <!-- DETTAGLIO VISITA -->
+                <template x-if="mostraModalDettaglio && visitaInDettaglio">
+                    <div class="modal fade show d-block" style="background-color: rgba(0, 0, 0, 0.5);" tabindex="-1"
+                        @click.self="chiudiDettaglioVisita()"
+                        @keydown.escape.window="mostraModalDettaglio && chiudiDettaglioVisita()">
+                        <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+                            <div class="modal-content border-0 shadow">
+
+                                <!-- HEADER MODALE -->
+                                <div class="modal-header bg-light">
+                                    <div>
+                                        <h4 class="modal-title fw-bold text-primary mb-0"
+                                            x-text="visitaInDettaglio.titolo"></h4>
+                                        <small class="text-muted">
+                                            ID: <span x-text="visitaInDettaglio.id_visita"></span> |
+                                            Durata: <span
+                                                x-text="(visitaInDettaglio.durata_stimata_minuti || 30) + ' min'"></span>
+                                            |
+                                            Costo: <span x-text="visitaInDettaglio.prezzo_crediti + ' Cr'"></span>
+                                        </small>
+                                    </div>
+                                    <button type="button" class="btn-close" @click="chiudiDettaglioVisita()"
+                                        aria-label="Chiudi dettaglio visita"></button>
+                                </div>
+
+                                <!-- BODY MODALE -->
+                                <div class="modal-body p-4">
+
+                                    <!-- Descrizione -->
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold text-dark border-bottom pb-2">Descrizione</h6>
+                                        <p class="text-secondary"
+                                            x-text="visitaInDettaglio.descrizione || 'Nessuna descrizione fornita per questa visita.'">
+                                        </p>
+                                    </div>
+
+                                    <!-- Lista Opere / Tappe in Griglia Card -->
+                                    <div>
+                                        <h6
+                                            class="fw-bold text-dark border-bottom pb-2 d-flex justify-content-between align-items-center">
+                                            <span>Itinerario Tappe</span>
+                                            <span class="badge bg-secondary"
+                                                x-text="getOpereDettaglio().length + ' opere'"></span>
+                                        </h6>
+
+                                        <!-- Griglia Card Piccole -->
+                                        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-3 pt-2">
+                                            <template x-for="(opera, index) in getOpereDettaglio()"
+                                                :key="opera.id_oggetto">
+                                                <div class="col">
+                                                    <div
+                                                        class="card h-100 border-0 shadow-sm bg-light position-relative overflow-hidden">
+
+                                                        <!-- Badge Numero Tappa -->
+                                                        <span
+                                                            class="position-absolute top-0 start-0 badge bg-dark opacity-75 m-1 rounded-circle"
+                                                            x-text="index + 1" style="z-index: 2;"></span>
+
+                                                        <!-- Badge Opzionale (In alto a destra) -->
+                                                        <template
+                                                            x-if="visitaInDettaglio.tappe?.find(t => String(t.id_oggetto) === String(opera.id_oggetto))?.opzionale">
+                                                            <span
+                                                                class="position-absolute top-0 end-0 badge bg-warning text-dark m-1 rounded-pill shadow-sm"
+                                                                style="z-index: 2;">
+                                                                Opzionale
+                                                            </span>
+                                                        </template>
+
+                                                        <!-- Immagine Opera -->
+                                                        <div style="height: 150px;" class="bg-secondary-subtle">
+                                                            <img :src="opera.immagine || '/media/placeholder.jpg'"
+                                                                class="w-100 h-100 object-fit-cover" :alt="opera.titolo"
+                                                                style="object-position: top;" loading="lazy"
+                                                                onerror="this.onerror=null; this.src='/media/placeholder.jpg'">
+                                                        </div>
+
+                                                        <!-- Titolo Opera -->
+                                                        <div class="card-body p-2 text-center">
+                                                            <div class="fw-bold small " :title="opera.titolo"
+                                                                x-text="opera.titolo || 'Senza Titolo'"></div>
+                                                            <small class="text-muted d-block text-truncate"
+                                                                x-text="formattaCorrelato(opera.id_artista) || ''"></small>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+
+                                        <!-- Fallback se non ci sono tappe caricate -->
+                                        <template x-if="getOpereDettaglio().length === 0">
+                                            <div class="alert alert-warning py-2 mt-2 small text-center">
+                                                Nessuna informazione o opera trovata per le tappe di questa visita.
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                </div>
+
+                                <!-- FOOTER MODALE -->
+                                <div class="modal-footer bg-light">
+                                    <button type="button" class="btn btn-secondary"
+                                        @click="chiudiDettaglioVisita()">Chiudi</button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </template>
+
+
+
+    </main>
+
+    <!-- ================= SUBFORM  CREAZIONE ARTISTI/TECNICHE/MOVIMENTI ================= -->
+    <div class="modal fade" :class="{ 'show d-block bg-dark bg-opacity-50': mostraSubForm }" id="modalSubForm"
+        tabindex="-1" x-data="gestoreSubForm()" @keydown.escape.window="mostraSubForm && (mostraSubForm = false)"
+        @apri-subform.window="apriSubForm($event.detail.tipo, $event.detail.elemento, $event.detail.targetField)">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow" x-show="mostraSubForm">
+
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title text-capitalize fw-bold"
+                        x-text="(eModifica ? 'Modifica ' : 'Nuovo ') + subFormData.tipo"></h5>
+                    <button type="button" class="btn-close" @click="mostraSubForm = false"
+                        aria-label="Chiudi finestra modale"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3 p-2 bg-light border rounded small text-muted">
+                        Non sai quale ID usare?
+                        <a href="https://www.wikidata.org" target="_blank" class="fw-bold">Cerca su Wikidata</a>
+                        e incolla il codice QID (es. <code>Q559676</code>), oppure inventane uno unico.
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">ID Oggetto / QID Wikidata *</label>
+                            <input type="text" class="form-control" x-model="subFormData.id_oggetto"
+                                placeholder="Es. Q559676" :disabled="eModifica" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">Nome / Titolo *</label>
+                            <input type="text" class="form-control" x-model="subFormData.titolo"
+                                placeholder="Es. Leonardo da Vinci" required>
+                        </div>
+                        <!-- Licenza -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold small">Licenza *</label>
+                            <select class="form-select" x-model="subFormData.licenza" required>
+                                <option value="Pubblico dominio">Pubblico dominio</option>
+                                <option value="Tutti i diritti riservati">Tutti i diritti riservati</option>
+                            </select>
+                        </div>
+                        <!-- Campo URL Immagine (Completato) -->
+                        <div class="col-12">
+                            <label class="form-label fw-bold small">URL Link Immagine</label>
+                            <input type="text" class="form-control" x-model="subFormData.immagine"
+                                placeholder="/media/artisti/... oppure https://...">
+                        </div>
+
+                        <!-- 10. Matrice Descrizioni dell'Opera -->
+                        <div class="col-12 mt-4">
+                            <h4 class="fw-bold mb-3">Descrizioni</h4>
+                            <div class="row g-3">
+                                <template x-for="target in ['infantile', 'semplice', 'medio', 'avanzato']"
+                                    :key="target">
+                                    <div class="col-md-6">
+                                        <div class="card p-3 bg-light border-0 shadow-sm">
+                                            <h6 class="fw-bold text-capitalize text-primary mb-3"
+                                                x-text="'Profilo: ' + target"></h6>
+                                            <template x-for="durata in ['3s', '15s', '1m', '3m']" :key="durata">
+                                                <div class="mb-2">
+                                                    <label class="form-label small text-muted mb-1"
+                                                        x-text="'Durata: ' + durata"></label>
+                                                    <textarea class="form-control form-control-sm" rows="5"
+                                                        x-model="subFormData.descrizioni[target][durata].testo"></textarea>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Modale con Azioni -->
+                <div class="modal-footer bg-light">
+                    <div x-show="eModifica" class="me-auto">
+                        <button type="button" class="btn btn-danger" @click="eliminaOggettoSubForm()">
+                            Elimina
+                        </button>
+                    </div>
+                    <button type="button" class="btn btn-secondary" @click="mostraSubForm = false"
+                        aria-label="Chiudi finestra modale">Annulla</button>
+                    <button type="button" class="btn btn-primary" @click="salvaSubForm()"
+                        x-text="eModifica ? 'Salva Modifiche' : 'Crea ' + subFormData.tipo"></button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= SUBFORM CREAZIONE E MODIFICA VISITA ================= -->
+    <div class="modal fade" :class="{ 'show d-block bg-dark bg-opacity-50': mostraSubFormVisita }" id="modalFormVisita"
+        tabindex="-1" x-data="gestoreFormVisita()" x-show="mostraSubFormVisita"
+        @keydown.escape.window="mostraSubFormVisita && chiudiSubForm()"
+        @apri-form-visita.window="apriSubFormVisita($event.detail?.visita); if($event.detail?.operaDaPreAggiungere) aggiungiTappa($event.detail.operaDaPreAggiungere.id_oggetto)"
+        x-cloak>
+
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow">
+
+                <!-- HEADER MODALE -->
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold"
+                        x-text="eModifica ? 'Modifica Visita (' + subFormData.id_visita + ')' : 'Nuova Visita'"></h5>
+                    <button type="button" class="btn-close" @click="chiudiSubForm()"
+                        aria-label="Chiudi modifica visita"></button>
+                </div>
+
+                <!-- BODY -->
+                <div class="modal-body">
+                    <div class="row g-3">
+
+                        <!-- Titolo Visita -->
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold small">Titolo Visita *</label>
+                            <input type="text" class="form-control" x-model="subFormData.titolo"
+                                placeholder="Es. Visita sul Rinascimento" required>
+                        </div>
+
+                        <!-- Durata Stimata -->
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold small">Durata (Minuti)</label>
+                            <input type="number" min="5" step="5" class="form-control"
+                                x-model.number="subFormData.durata_stimata_minuti">
+                        </div>
+
+                        <!-- Prezzo Crediti -->
+                        <div class="col-md-2">
+                            <label class="form-label fw-bold small">Prezzo (Crediti)</label>
+                            <input type="number" min="0" class="form-control"
+                                x-model.number="subFormData.prezzo_crediti">
+                        </div>
+
+                        <!-- Descrizione -->
+                        <div class="col-12">
+                            <label class="form-label fw-bold small">Descrizione</label>
+                            <textarea class="form-control" rows="3" x-model="subFormData.descrizione"
+                                placeholder="Inserisci Descrizione per il percorso"></textarea>
+                        </div>
+
+                        <!-- URL Immagine Copertina -->
+                        <div class="col-12">
+                            <label class="form-label fw-bold small">URL Immagine di Copertina</label>
+                            <input type="url" class="form-control" x-model="subFormData.immagine_copertina"
+                                placeholder="/media/placeholder.jpg">
+                        </div>
+
+                        <!-- ================= SEZIONE GESTIONE TAPPE ================= -->
+                        <div class="col-12 mt-4">
+                            <div class="card p-3 bg-light border-0 shadow-sm">
+
+                                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                                    <div>
+                                        <h6 class="fw-bold m-0 text-primary">Tappe del Percorso</h6>
+                                        <small class="text-muted">Aggiungi e riordina le opere che compongono la
+                                            visita.</small>
+                                    </div>
+
+                                    <!-- Bottone Ordinamento Automatico per Sala -->
+                                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                                        @click="ordinaTappeperSala()" :disabled="subFormData.tappe.length < 2">
+                                        <i class="bi bi-sort-numeric-down me-1"></i> Ordina Automaticamente per Sala
+                                    </button>
+                                </div>
+
+                                <!-- SELETTORE PER AGGIUNGERE UN'OPERA -->
+                                <div class="card p-3 mb-3 border bg-white rounded">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label class="form-label fw-bold small m-0 text-dark">
+                                            <i class="bi bi-funnel me-1"></i> Filtra Catalogo Opere
+                                        </label>
+                                        <!-- Bottone Reset Filtri (visibile solo se almeno un filtro è attivo) -->
+                                        <button type="button" class="btn btn-link btn-sm text-decoration-none p-0"
+                                            x-show="filtroTesto || filtroSala || filtroArtista || filtroTecnica || filtroMovimento"
+                                            @click="resetFiltriOpere()">
+                                            Resetta filtri
+                                        </button>
+                                    </div>
+
+                                    <!-- RIGA DEI FILTRI -->
+                                    <div class="row g-2 mb-3">
+                                        <!-- Cerca per Testo (Titolo o ID) -->
+                                        <div class="col-12">
+                                            <input type="text" class="form-control form-control-sm"
+                                                placeholder="Cerca titolo o ID..." x-model="filtroTesto">
+                                        </div>
+                                        <!-- Filtro per Sala -->
+                                        <div class="col-6 col-lg-3">
+                                            <select class="form-select form-select-sm" x-model="filtroSala">
+                                                <option value="">Tutte le Sale</option>
+                                                <template x-for="sala in opzioniSale" :key="sala.id">
+                                                    <option :value="sala.id" x-text="sala.nome"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+
+                                        <!-- Filtro per Artista -->
+                                        <div class="col-6 col-lg-3">
+                                            <select class="form-select form-select-sm" x-model="filtroArtista">
+                                                <option value="">Tutti gli Artisti</option>
+                                                <template x-for="artista in opzioniArtisti" :key="artista.id">
+                                                    <option :value="artista.id" x-text="artista.nome"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+
+                                        <!-- Filtro per Tecnica -->
+                                        <div class="col-6 col-lg-3">
+                                            <select class="form-select form-select-sm" x-model="filtroTecnica">
+                                                <option value="">Tutte le Tecniche</option>
+                                                <template x-for="tecnica in opzioniTecniche" :key="tecnica.id">
+                                                    <option :value="tecnica.id" x-text="tecnica.nome"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+
+                                        <!-- Filtro per Movimento -->
+                                        <div class="col-6 col-lg-3">
+                                            <select class="form-select form-select-sm" x-model="filtroMovimento">
+                                                <option value="">Tutti i Movimenti</option>
+                                                <template x-for="mov in opzioniMovimenti" :key="mov.id">
+                                                    <option :value="mov.id" x-text="mov.nome"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- TENDINA SELEZIONE OPERA FILTRATA + TASTO AGGIUNGI -->
+                                    <div class="row g-2 align-items-end">
+                                        <div class="col-12 col-md-9">
+                                            <label class="form-label fw-bold small">Seleziona Opera da Aggiungere
+                                                *</label>
+                                            <select class="form-select" x-model="idOggettoSelezionato">
+                                                <option value=""
+                                                    x-text="opereFiltrate.length > 0 ? '-- Scegli un\'opera (' + opereFiltrate.length + ' disponibili) --' : '-- Nessuna opera trovata con questi filtri --'">
+                                                </option>
+                                                <template x-for="opera in opereFiltrate" :key="opera.id_oggetto">
+                                                    <option :value="opera.id_oggetto"
+                                                        x-text="(opera.titolo || opera.id_oggetto) + (opera.id_sala ? ' [' + opera.id_sala + ']' : '') + (opera.autore ? ' - ' + opera.autore : '')">
+                                                    </option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                        <div class="col-12 col-md-3">
+                                            <button type="button" class="btn btn-primary w-100"
+                                                @click="aggiungiTappa(idOggettoSelezionato); idOggettoSelezionato = '';"
+                                                :disabled="!idOggettoSelezionato">
+                                                + Aggiungi Tappa
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- TABELLA / LISTA DELLE TAPPE AGGIUNTE -->
+                                <template x-if="subFormData.tappe.length === 0">
+                                    <div class="alert alert-warning text-center m-0 py-3 small">
+                                        Nessuna tappa ancora inserita in questa visita.
+                                    </div>
+                                </template>
+
+                                <template x-if="subFormData.tappe.length > 0">
+                                    <div class="table-responsive bg-white rounded border">
+                                        <table class="table table-hover align-middle mb-0">
+                                            <thead class="table-light small">
+                                                <tr>
+                                                    <th style="width: 50px;" class="text-center">#</th>
+                                                    <th>Opera</th>
+                                                    <th>Sala</th>
+                                                    <th style="width: 100px;" class="text-center">Opzionale</th>
+                                                    <th style="width: 140px;" class="text-center">Ordina</th>
+                                                    <th style="width: 60px;" class="text-center">Azione</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <template x-for="(tappa, index) in subFormData.tappe"
+                                                    :key="tappa.id_oggetto">
+                                                    <tr>
+                                                        <!-- Numero Tappa -->
+                                                        <td class="text-center fw-bold text-muted" x-text="index + 1">
+                                                        </td>
+
+                                                        <!-- Titolo Opera / ID -->
+                                                        <td>
+                                                            <span class="fw-bold text-dark"
+                                                                x-text="($store.app.opere || []).find(op => String(op.id_oggetto) === String(tappa.id_oggetto))?.titolo || tappa.id_oggetto">
+                                                            </span>
+                                                            <br>
+                                                            <small class="text-muted"
+                                                                x-text="'ID: ' + tappa.id_oggetto"></small>
+                                                        </td>
+
+                                                        <!-- Sala -->
+                                                        <td>
+                                                            <span class="badge bg-secondary-subtle text-dark border"
+                                                                x-text="($store.app.opere || []).find(op => String(op.id_oggetto) === String(tappa.id_oggetto))?.id_sala || 'N/D'">
+                                                            </span>
+                                                        </td>
+                                                        <!-- Checkbox Opzionale -->
+                                                        <td class="text-center">
+                                                            <div class="form-check d-flex justify-content-center m-0">
+                                                                <input class="form-check-input" type="checkbox"
+                                                                    x-model="tappa.opzionale"
+                                                                    title="Segna come tappa opzionale">
+                                                            </div>
+                                                        </td>
+
+                                                        <!-- Controlli di Ordinamento (Su/Giù) -->
+                                                        <td class="text-center">
+                                                            <div class="btn-group btn-group-sm" role="group">
+                                                                <button type="button" class="btn btn-outline-secondary"
+                                                                    @click="spostaTappa(index, -1)"
+                                                                    :disabled="index === 0" title="Sposta Su"
+                                                                    aria-label="Sposta tappa in alto">
+                                                                    ▲
+                                                                </button>
+                                                                <button type="button" class="btn btn-outline-secondary"
+                                                                    @click="spostaTappa(index, 1)"
+                                                                    :disabled="index === subFormData.tappe.length - 1"
+                                                                    title="Sposta Giù"
+                                                                    aria-label="Sposta tappa in basso">
+                                                                    ▼
+                                                                </button>
+                                                            </div>
+                                                        </td>
+
+                                                        <!-- Elimina Tappa -->
+                                                        <td class="text-center">
+                                                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                                                @click="rimuoviTappa(index)" title="Rimuovi Tappa"
+                                                                aria-label="Rimuovi tappa dalla lista">
+                                                                ✕
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </template>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- FOOTER MODALE -->
+                <div class="modal-footer bg-light">
+                    <template x-if="eModifica">
+                        <div class="me-auto">
+                            <button type="button" class="btn btn-outline-danger" @click="eliminaSubForm()">
+                                Elimina Visita
+                            </button>
+                        </div>
+                    </template>
+                    <button type="button" class="btn btn-secondary" @click="chiudiSubForm()">Annulla</button>
+                    <button type="button" class="btn btn-primary" @click="salvaBozza()"
+                        x-text="eModifica ? 'Salva Modifiche' : 'Salva Bozza'"></button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST — sostituisce alert() -->
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1100;" x-data="gestoreMessaggi()"
+        @mostra-messaggio.window="mostraToast($event.detail.testo, $event.detail.tipo)">
+        <template x-for="toast in toasts" :key="toast.id">
+            <div class="toast show mb-2"
+                :class="'text-bg-' + (toast.tipo === 'errore' ? 'danger' : toast.tipo === 'successo' ? 'success' : 'dark')"
+                role="alert" x-transition style="min-width: 280px;">
+                <div class="d-flex">
+                    <div class="toast-body" x-text="toast.testo"></div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" @click="rimuoviToast(toast.id)"
+                        aria-label="Chiudi"></button>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- MODALE CONFERMA — sostituisce confirm() -->
+    <div class="modal fade" :class="{ 'show d-block bg-dark bg-opacity-50': mostraConferma }" style="z-index: 1200;"
+        x-data="gestoreConferma()"
+        @richiedi-conferma.window="apriConferma($event.detail.messaggio, $event.detail.onConferma)"
+        @keydown.escape.window="mostraConferma && (mostraConferma = false)">
+        <div class="modal-dialog modal-dialog-centered" x-show="mostraConferma">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-body p-4 text-center">
+                    <p class="mb-4" x-text="messaggioConferma"></p>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button type="button" class="btn btn-secondary" @click="mostraConferma = false">
+                            Annulla
+                        </button>
+                        <button type="button" class="btn btn-danger" @click="conferma()">
+                            Conferma
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- FOOTER EDITOR -->
+    <footer class="bg-dark text-white-50 py-3 mt-auto border-top border-secondary" x-show="$store.app.utente" x-cloak>
+        <div
+            class="container d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 text-center text-sm-start">
+            <div>
+                <small class="fw-bold text-white">ArtAround</small>
+                <small class="d-block d-sm-inline ms-sm-2 text-white-50">&copy; Piattaforma Gestione Museale &
+                    Marketplace</small>
+            </div>
+
+            <div class="d-flex align-items-center gap-3 small">
+                <template x-if="$store.app.museoSelezionato">
+                    <span class="text-truncate" style="max-width: 220px;">
+                        <strong class="text-light" x-text="$store.app.museoSelezionato.nome"></strong>
+                    </span>
+                </template>
+            </div>
+        </div>
+    </footer>
+
+
+</body>
+
+</html>
